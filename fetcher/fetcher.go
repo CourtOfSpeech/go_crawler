@@ -3,7 +3,6 @@ package fetcher
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -30,8 +29,9 @@ func Fetch(url string) ([]byte, error) {
 	//如果有乱码, 这个需要第三方库：golang.org/x/text 的支持
 	//utf8Reader := transform.NewReader(resp.Body, simplifiedchinese.GBK.NewDecoder())
 	//如果要自动识别抓取页面的字符编码
-	e := determineEncoding(resp.Body)
-	utf8Reader := transform.NewReader(resp.Body, e.NewDecoder())
+	readerBody := bufio.NewReader(resp.Body)
+	e := determineEncoding(readerBody)
+	utf8Reader := transform.NewReader(readerBody, e.NewDecoder())
 	//如果抓取的页面编码格式不为utf-8,
 	//all, err := ioutil.ReadAll(utf8Reader)
 	//抓取页面的Body,这种方式没有处理字符编码，有可能会乱码
@@ -41,9 +41,9 @@ func Fetch(url string) ([]byte, error) {
 }
 
 //封装一个方法，用来返回抓取页面的字符编码格式
-func determineEncoding(r io.Reader) encoding.Encoding {
+func determineEncoding(r *bufio.Reader) encoding.Encoding {
 	//将数据转化为1024的[]byte
-	bytes, err := bufio.NewReader(r).Peek(1024)
+	bytes, err := r.Peek(1024)
 	if err != nil {
 		panic(err)
 	}
