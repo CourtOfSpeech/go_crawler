@@ -21,7 +21,7 @@ func TestParseCityList(t *testing.T) {
 		"http://www.zhenai.com/zhenghun/aba", "http://www.zhenai.com/zhenghun/akesu", "http://www.zhenai.com/zhenghun/alashanmeng",
 	}
 	expectdecities := []string{
-		"阿坝", "阿克苏", "阿拉善盟",
+		"City 阿坝", "City 阿克苏", "City 阿拉善盟",
 	}
 	//判断读取的内容长度是否相同
 	if len(result.Requests) != resultSize {
