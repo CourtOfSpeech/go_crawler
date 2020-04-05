@@ -21,10 +21,14 @@ var houseRe = regexp.MustCompile(`<div class="m-btn pink" data-v-8b1eac0c>([\p{H
 var carRe = regexp.MustCompile(`<div class="m-btn pink" data-v-8b1eac0c>([[\p{Han}]+车)</div>`)
 
 //ParseProfile 用户信息的解析器
-func ParseProfile(contents []byte) engine.ParserResult {
+//contents 要解析的内容
+//name 用户的名字
+func ParseProfile(contents []byte, name string) engine.ParserResult {
 	//声明用户信息的结构
 	proflie := model.Profile{}
 
+	//姓名
+	proflie.Name = name
 	//年龄
 	age, err := strconv.Atoi(extractString(contents, ageRe))
 	if err != nil {

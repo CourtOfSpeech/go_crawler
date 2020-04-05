@@ -12,9 +12,13 @@ import (
 )
 
 //Fetch 根据传入的url地址，获取对应的内容返回
-func Fetch(url string) ([]byte, error) {
-	//打开页面
-	resp, err := http.Get(url)
+func Fetch(URL string) ([]byte, error) {
+	//打开页面,直接用http.Get容易遇到403
+	//resp, err := http.Get(url)
+	client := &http.Client{}
+	request, err := http.NewRequest(http.MethodGet, URL, nil)
+	request.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36")
+	resp, err := client.Do(request)
 	if err != nil {
 		return nil, err
 	}
