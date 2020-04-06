@@ -16,7 +16,17 @@ func (s *SimpleScheduler) Submit(r engine.Request) {
 	}()
 }
 
-//ConfigureMasterWorkerChan 实现 engine.Scheduler.ConfigureMasterWorkerChan()
-func (s *SimpleScheduler) ConfigureMasterWorkerChan(c chan engine.Request) {
-	s.workerChan = c
+//WorkerChan engine.WorkerChan的实现
+func (s *SimpleScheduler) WorkerChan() chan engine.Request {
+	return s.workerChan
+}
+
+//WorkerReady engine.WorkerReady的实现
+func (s *SimpleScheduler) WorkerReady(_ chan engine.Request) {
+
+}
+
+//Run  engine.Run的实现
+func (s *SimpleScheduler) Run() {
+	s.workerChan = make(chan engine.Request)
 }

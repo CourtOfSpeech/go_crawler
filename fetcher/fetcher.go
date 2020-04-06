@@ -14,7 +14,7 @@ import (
 )
 
 //限制一下发送请求的时间,不然请求太快，会卡住
-var rateLimiter = time.Tick(100 * time.Millisecond)
+var rateLimiter = time.Tick(2 * time.Second)
 
 //Fetch 根据传入的url地址，获取对应的内容返回
 func Fetch(URL string) ([]byte, error) {
