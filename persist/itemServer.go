@@ -1,6 +1,8 @@
 package persist
 
-import "log"
+import (
+	"log"
+)
 
 //ItemServer ItemServer
 func ItemServer() chan interface{} {
@@ -11,8 +13,15 @@ func ItemServer() chan interface{} {
 			item := <-out
 			log.Printf("Item Server: got item: #%d: %v", itemCount, item)
 			itemCount++
+
+			save(item)
 		}
 
 	}()
 	return out
+}
+
+//save 向elasticsearch存储
+func save(item interface{}) {
+
 }
