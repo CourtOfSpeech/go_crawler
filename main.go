@@ -2,6 +2,7 @@ package main
 
 import (
 	"crawler/engine"
+	"crawler/persist"
 	"crawler/scheduler"
 	"crawler/zhenai/parser"
 )
@@ -15,6 +16,7 @@ func main() {
 	e := engine.ConcurrentEngine{
 		Scheduler:   &scheduler.QueudeScheduler{},
 		WorkerCount: 10,
+		ItemChan:    persist.ItemServer(),
 	}
 	// e.Run(engine.Request{
 	// 	URL:        "https://www.zhenai.com/zhenghun",
