@@ -6,12 +6,15 @@ import (
 	"strings"
 )
 
-const cityRe = `<a href="(http://album.zhenai.com/u/[0-9]+)"[^>]*>([^<]+)</a>`
+var (
+	profileRe = regexp.MustCompile(
+		`<a href="(http://album.zhenai.com/u/[0-9]+)"[^>]*>([^<]+)</a>`)
+	cityUrlRe = regexp.MustCompile(`href="(http://www.zhenai.com/zhenghun/[^"]+)"`)
+)
 
 //ParseCity 城市的解析器
 func ParseCity(contents []byte) engine.ParserResult {
-	re := regexp.MustCompile(cityRe)
-	matches := re.FindAllSubmatch(contents, -1)
+	matches := profileRe.FindAllSubmatch(contents, -1)
 
 	result := engine.ParserResult{}
 	for _, m := range matches {
@@ -29,5 +32,16 @@ func ParseCity(contents []byte) engine.ParserResult {
 				},
 			})
 	}
+	//城市
+	matches = cityUrlRe.FindAllSubmatch(contents, -1)
+	for _, m := range matches {
+		url := strings.Replace(string(m[1]), "http", "https", 1)
+		result.Requests = append(result.Requests,
+			engine.Request{
+				URL:        url,
+				ParserFunc: ParseCity,
+			})
+	}
+
 	return result
 }

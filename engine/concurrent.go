@@ -47,6 +47,11 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 
 		//把返回的所有请求在传给 Scheduler
 		for _, request := range result.Requests {
+			//先去重复
+			if isDuplicate(request.URL) {
+				continue
+			}
+			//没有重复在提交给Scheduler
 			e.Scheduler.Submit(request)
 		}
 	}
@@ -65,4 +70,15 @@ func createWorker(in chan Request, out chan ParserResult, ready ReadyNotifier) {
 			out <- result
 		}
 	}()
+}
+
+var urlVisitRecord = make(map[string]bool)
+
+//去重复判断
+func isDuplicate(url string) bool {
+	if urlVisitRecord[url] {
+		return true
+	}
+	urlVisitRecord[url] = true
+	return false
 }
