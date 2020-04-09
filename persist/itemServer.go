@@ -4,7 +4,6 @@ import (
 	"context"
 	"crawler/model"
 	"encoding/json"
-	"fmt"
 	"log"
 	"strings"
 
@@ -22,7 +21,10 @@ func ItemServer() chan interface{} {
 			log.Printf("Item Server: got item: #%d: %v", itemCount, item)
 			itemCount++
 
-			save(item)
+			_, err := save(item) 
+			if err != nil {
+				log.Printf("Item Server Error: saving item %v:%v", item, err)
+			}
 		}
 
 	}()
@@ -30,10 +32,10 @@ func ItemServer() chan interface{} {
 }
 
 //save 向elasticsearch存储
-func save(item interface{}) {
+func save(item interface{}) (string, error) {
 	es, err := elasticsearch.NewDefaultClient()
 	if err != nil {
-		fmt.Println(err)
+		return "", err
 	}
 	//log.Println(elasticsearch.Version)
 	//log.Println(es.Info())
@@ -41,10 +43,11 @@ func save(item interface{}) {
 	if profile, ok := item.(model.Profile); ok {
 		proStr, err := json.Marshal(profile)
 		if err != nil {
-			fmt.Printf("Profile json parsing Error: %s", err)
+			log.Printf("Profile json parsing Error: %s", err)
+			return "", err
 		}
 		b.WriteString(string(proStr))
-		fmt.Println(string(proStr))
+		//fmt.Println(string(proStr))
 	}
 	req := esapi.IndexRequest{
 		Index:        "dating_profile",
@@ -56,20 +59,19 @@ func save(item interface{}) {
 	res, err := req.Do(context.Background(), es)
 	if err != nil {
 		log.Fatalf("Error getting response: %s", err)
+		return "", err
 	}
 	defer res.Body.Close()
-
+	var r map[string]interface{}
 	if res.IsError() {
 		log.Printf("[%s]", res.Status())
 	} else {
 		// Deserialize the response into a map.
-		var r map[string]interface{}
 		if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
 			log.Printf("Error parsing the response body: %s", err)
-		} else {
-			// Print the response status and indexed document version.
-			log.Printf("[%s] %s; version=%d", res.Status(), r["result"], int(r["_version"].(float64)))
+			return "", err
 		}
 	}
-
+	//log.Printf("[%s]; version=%d; id=%v", res.Status(), int(r["_version"].(float64)), r["_id"])
+	return r["_id"].(string), nil
 }
