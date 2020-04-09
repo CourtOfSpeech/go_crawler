@@ -2,8 +2,10 @@ package persist
 
 import (
 	"context"
+	"crawler/engine"
 	"crawler/model"
 	"encoding/json"
+	"errors"
 	"log"
 	"strings"
 
@@ -12,8 +14,8 @@ import (
 )
 
 //ItemServer ItemServer
-func ItemServer() chan interface{} {
-	out := make(chan interface{})
+func ItemServer() chan engine.Items {
+	out := make(chan engine.Items)
 	go func() {
 		itemCount := 0
 		for {
@@ -21,7 +23,7 @@ func ItemServer() chan interface{} {
 			log.Printf("Item Server: got item: #%d: %v", itemCount, item)
 			itemCount++
 
-			_, err := save(item) 
+			err := save(item)
 			if err != nil {
 				log.Printf("Item Server Error: saving item %v:%v", item, err)
 			}
@@ -32,46 +34,56 @@ func ItemServer() chan interface{} {
 }
 
 //save 向elasticsearch存储
-func save(item interface{}) (string, error) {
+func save(item engine.Items) error {
+	if item.Type == "" {
+		return errors.New("must supply Type")
+	}
+
 	es, err := elasticsearch.NewDefaultClient()
 	if err != nil {
-		return "", err
+		return err
 	}
 	//log.Println(elasticsearch.Version)
 	//log.Println(es.Info())
 	var b strings.Builder
-	if profile, ok := item.(model.Profile); ok {
+	if profile, ok := item.Payload.(model.Profile); ok {
 		proStr, err := json.Marshal(profile)
 		if err != nil {
 			log.Printf("Profile json parsing Error: %s", err)
-			return "", err
+			return err
 		}
 		b.WriteString(string(proStr))
 		//fmt.Println(string(proStr))
 	}
 	req := esapi.IndexRequest{
 		Index:        "dating_profile",
-		DocumentType: "zhenai",
+		DocumentType: item.Type,
 		Body:         strings.NewReader(b.String()),
 		Refresh:      "true",
 	}
+	//log.Printf("IndexRequest: %v", req)
+	if item.ID != "" {
+		req.DocumentID = item.ID
+	}
+	//log.Printf("IndexRequest: %v", req)
 
 	res, err := req.Do(context.Background(), es)
 	if err != nil {
-		log.Fatalf("Error getting response: %s", err)
-		return "", err
+		//log.Fatalf("Error getting response: %s", err)
+		return err
 	}
 	defer res.Body.Close()
 	var r map[string]interface{}
 	if res.IsError() {
-		log.Printf("[%s]", res.Status())
-	} else {
-		// Deserialize the response into a map.
-		if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
-			log.Printf("Error parsing the response body: %s", err)
-			return "", err
-		}
+		//log.Printf("[%s]", res.Status())
+		return errors.New("Response Status Code " + res.Status())
 	}
+	// Deserialize the response into a map.
+	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+		//log.Printf("Error parsing the response body: %s", err)
+		return err
+	}
+
 	//log.Printf("[%s]; version=%d; id=%v", res.Status(), int(r["_version"].(float64)), r["_id"])
-	return r["_id"].(string), nil
+	return nil
 }

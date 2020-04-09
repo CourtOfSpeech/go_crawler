@@ -18,7 +18,7 @@ func ParseCityList(contents []byte) engine.ParserResult {
 	limit := 1
 	for _, m := range matches {
 		//将城市的名字作为Items
-		result.Items = append(result.Items, "City "+string(m[2]))
+		//result.Items = append(result.Items, "City "+string(m[2]))
 
 		url := strings.Replace(string(m[1]), "http", "https", 1)
 		result.Requests = append(result.Requests,

@@ -4,7 +4,7 @@ package engine
 type ConcurrentEngine struct {
 	Scheduler   Scheduler
 	WorkerCount int
-	ItemChan    chan interface{}
+	ItemChan    chan Items
 }
 
 //Scheduler Scheduler
@@ -39,7 +39,7 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 	for {
 		result := <-out
 		for _, item := range result.Items {
-			go func(item interface{}) {
+			go func(item Items) {
 				e.ItemChan <- item
 			}(item)
 		}

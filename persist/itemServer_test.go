@@ -3,6 +3,7 @@ package persist
 import (
 	"bytes"
 	"context"
+	"crawler/engine"
 	"crawler/model"
 	"encoding/json"
 	"fmt"
@@ -15,29 +16,33 @@ import (
 
 func Test_save(t *testing.T) {
 	type args struct {
-		item interface{}
+		item engine.Items
 	}
 	tests := []struct {
 		name string
 		args args
 	}{
 		// TODO: Add test cases.
-		{"在水伊人", args{item: model.Profile{
-			Name:   "在水伊人",
-			Age:    44,
-			Height: 155,
-			Income: "8千-1.2万",
-			Xinzuo: "魔羯座",
-			Hokou:  "四川成都",
-			House:  "已购房",
-			Car:    "未买车"}}},
+		{"在水伊人", args{item: engine.Items{
+			URL:  "https://album.zhenai.com/u/1402882293",
+			Type: "zhenhun",
+			ID:   "1402882293",
+			Payload: model.Profile{
+				Name:   "在水伊人",
+				Age:    44,
+				Height: 155,
+				Income: "8千-1.2万",
+				Xinzuo: "魔羯座",
+				Hokou:  "四川成都",
+				House:  "已购房",
+				Car:    "未买车"}}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			id, err := save(tt.args.item)
-			if err != nil {
-				fmt.Println(err)
+			if err := save(tt.args.item); err != nil {
+				t.Errorf("save() error = %v", err)
 			}
+
 			//TODO: Try to start up elasticsearch
 			//here using docker go client
 			es, err := elasticsearch.NewDefaultClient()
@@ -50,13 +55,14 @@ func Test_save(t *testing.T) {
 			query := map[string]interface{}{
 				"query": map[string]interface{}{
 					"match": map[string]interface{}{
-						"_id": id,
+						"_id": tt.args.item.ID,
 					},
 				},
 			}
 			if err := json.NewEncoder(&buf).Encode(query); err != nil {
 				log.Fatalf("Error encoding query: %s", err)
 			}
+
 			// Perform the search request.
 			res, err := es.Search(
 				es.Search.WithContext(context.Background()),
@@ -83,10 +89,11 @@ func Test_save(t *testing.T) {
 				if err != nil {
 					fmt.Println(err)
 				}
-				if tt.args.item != person {
+				if tt.args.item.Payload != person {
 					t.Errorf("got %v; expected %v", person, tt.args.item)
 				}
 			}
+
 		})
 	}
 }

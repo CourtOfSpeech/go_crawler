@@ -9,7 +9,7 @@ import (
 var (
 	profileRe = regexp.MustCompile(
 		`<a href="(http://album.zhenai.com/u/[0-9]+)"[^>]*>([^<]+)</a>`)
-	cityUrlRe = regexp.MustCompile(`href="(http://www.zhenai.com/zhenghun/[^"]+)"`)
+	cityURLRe = regexp.MustCompile(`href="(http://www.zhenai.com/zhenghun/[^"]+)"`)
 )
 
 //ParseCity 城市的解析器
@@ -20,7 +20,7 @@ func ParseCity(contents []byte) engine.ParserResult {
 	for _, m := range matches {
 		name := string(m[2])
 		//将用户的名字作为Items
-		result.Items = append(result.Items, "User "+name)
+		//result.Items = append(result.Items, "User "+name)
 
 		url := strings.Replace(string(m[1]), "http", "https", 1)
 		result.Requests = append(result.Requests,
@@ -33,7 +33,7 @@ func ParseCity(contents []byte) engine.ParserResult {
 			})
 	}
 	//城市
-	matches = cityUrlRe.FindAllSubmatch(contents, -1)
+	matches = cityURLRe.FindAllSubmatch(contents, -1)
 	for _, m := range matches {
 		url := strings.Replace(string(m[1]), "http", "https", 1)
 		result.Requests = append(result.Requests,

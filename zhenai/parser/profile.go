@@ -56,8 +56,13 @@ func ParseProfile(contents []byte, name string) engine.ParserResult {
 	proflie.Car = extractString(contents, carRe)
 	//婚姻状况
 	//proflie.Marriage = extractString(contents, marriageRe)
-
-	result := engine.ParserResult{Items: []interface{}{proflie}}
+	item := engine.Items{
+		URL:     "",
+		ID:      "",
+		Type:    "zhenhun",
+		Payload: proflie,
+	}
+	result := engine.ParserResult{Items: []engine.Items{item}}
 	return result
 }
 
