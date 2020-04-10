@@ -13,8 +13,12 @@ import (
 )
 
 //ItemServer ItemServer
-func ItemServer() chan engine.Items {
+func ItemServer(index string) (chan engine.Items, error) {
 	out := make(chan engine.Items)
+	es, err := elasticsearch.NewDefaultClient()
+	if err != nil {
+		return out, err
+	}
 	go func() {
 		itemCount := 0
 		for {
@@ -22,25 +26,20 @@ func ItemServer() chan engine.Items {
 			log.Printf("Item Server: got item: #%d: %v", itemCount, item)
 			itemCount++
 
-			err := save(item)
+			err := save(item, es, index)
 			if err != nil {
 				log.Printf("Item Server Error: saving item %v:%v", item, err)
 			}
 		}
 
 	}()
-	return out
+	return out, nil
 }
 
-//save 向elasticsearch存储
-func save(item engine.Items) error {
+//save 坑elasticsearch存储
+func save(item engine.Items, es *elasticsearch.Client, index string) error {
 	if item.Type == "" {
 		return errors.New("must supply Type")
-	}
-
-	es, err := elasticsearch.NewDefaultClient()
-	if err != nil {
-		return err
 	}
 	//log.Println(elasticsearch.Version)
 	//log.Println(es.Info())
@@ -53,7 +52,7 @@ func save(item engine.Items) error {
 	b.WriteString(string(profile))
 
 	req := esapi.IndexRequest{
-		Index:        "dating_profile",
+		Index:        index,
 		DocumentType: item.Type,
 		Body:         strings.NewReader(b.String()),
 		Refresh:      "true",

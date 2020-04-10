@@ -14,7 +14,7 @@ func TestParseCityList(t *testing.T) {
 	}
 
 	//fmt.Printf("%s\n", contents)
-	result := ParseCityList(contents)
+	result := ParseCityList(contents, "")
 
 	const resultSize = 470
 	expectdeURLs := []string{

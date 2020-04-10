@@ -17,13 +17,18 @@ import (
 func Test_save(t *testing.T) {
 	type args struct {
 		item engine.Items
+		es   *elasticsearch.Client
+	}
+	esc, err := elasticsearch.NewDefaultClient()
+	if err != nil {
+		fmt.Println(err)
 	}
 	tests := []struct {
 		name string
 		args args
 	}{
 		// TODO: Add test cases.
-		{"在水伊人", args{item: engine.Items{
+		{"在水伊人", args{es: esc, item: engine.Items{
 			URL:  "https://album.zhenai.com/u/1402882293",
 			Type: "zhenhun",
 			ID:   "1402882293",
@@ -37,18 +42,16 @@ func Test_save(t *testing.T) {
 				House:  "已购房",
 				Car:    "未买车"}}}},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := save(tt.args.item); err != nil {
+			if err := save(tt.args.item, tt.args.es); err != nil {
 				t.Errorf("save() error = %v", err)
 			}
 
 			//TODO: Try to start up elasticsearch
 			//here using docker go client
-			es, err := elasticsearch.NewDefaultClient()
-			if err != nil {
-				fmt.Println(err)
-			}
+
 			// Search for the indexed documents
 			// Build the request body.
 			var buf bytes.Buffer
@@ -64,13 +67,13 @@ func Test_save(t *testing.T) {
 			}
 
 			// Perform the search request.
-			res, err := es.Search(
-				es.Search.WithContext(context.Background()),
-				es.Search.WithIndex("dating_profile"),
-				es.Search.WithDocumentType("zhenai"),
-				es.Search.WithBody(&buf),
-				es.Search.WithTrackTotalHits(true),
-				es.Search.WithPretty(),
+			res, err := tt.args.es.Search(
+				tt.args.es.Search.WithContext(context.Background()),
+				tt.args.es.Search.WithIndex("dating_profile"),
+				tt.args.es.Search.WithDocumentType("zhenai"),
+				tt.args.es.Search.WithBody(&buf),
+				tt.args.es.Search.WithTrackTotalHits(true),
+				tt.args.es.Search.WithPretty(),
 			)
 			if err != nil {
 				log.Fatalf("Error getting response: %s", err)

@@ -1,9 +1,12 @@
 package engine
 
+//ParserFunc ParserFunc
+type ParserFunc func(contents []byte, url string) ParserResult
+
 //Request  ...
 type Request struct {
 	URL        string
-	ParserFunc func([]byte) ParserResult
+	ParserFunc ParserFunc
 }
 
 //ParserResult 解析器返回内容的

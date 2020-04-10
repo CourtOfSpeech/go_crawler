@@ -9,7 +9,7 @@ import (
 const cityListRe = `<a href="(http://www.zhenai.com/zhenghun/[0-9a-z]+)"[^>]*>([^<]+)</a>`
 
 //ParseCityList 城市列表的解析器
-func ParseCityList(contents []byte) engine.ParserResult {
+func ParseCityList(contents []byte, _ string) engine.ParserResult {
 	re := regexp.MustCompile(cityListRe)
 	matches := re.FindAllSubmatch(contents, -1)
 

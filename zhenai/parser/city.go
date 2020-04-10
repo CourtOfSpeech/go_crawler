@@ -13,23 +13,17 @@ var (
 )
 
 //ParseCity 城市的解析器
-func ParseCity(contents []byte) engine.ParserResult {
+func ParseCity(contents []byte, _ string) engine.ParserResult {
 	matches := profileRe.FindAllSubmatch(contents, -1)
 
 	result := engine.ParserResult{}
 	for _, m := range matches {
-		name := string(m[2])
-		//将用户的名字作为Items
-		//result.Items = append(result.Items, "User "+name)
-
 		url := strings.Replace(string(m[1]), "http", "https", 1)
 		result.Requests = append(result.Requests,
 
 			engine.Request{
-				URL: url,
-				ParserFunc: func(c []byte) engine.ParserResult {
-					return ParseProfile(c, url, name)
-				},
+				URL:        url,
+				ParserFunc: ProfileParse(string(m[2])),
 			})
 	}
 	//城市
@@ -44,4 +38,11 @@ func ParseCity(contents []byte) engine.ParserResult {
 	}
 
 	return result
+}
+
+//ProfileParse ProfileParse
+func ProfileParse(name string) engine.ParserFunc {
+	return func(c []byte, url string) engine.ParserResult {
+		return ParseProfile(c, url, name)
+	}
 }
