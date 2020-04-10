@@ -19,11 +19,12 @@ var xinzuoRe = regexp.MustCompile(`<div class="m-btn purple" data-v-8b1eac0c>([\
 var hokouRe = regexp.MustCompile(`<div class="m-btn pink" data-v-8b1eac0c>籍贯:([^<]+)</div>`)
 var houseRe = regexp.MustCompile(`<div class="m-btn pink" data-v-8b1eac0c>([\p{Han}]+房)</div>`)
 var carRe = regexp.MustCompile(`<div class="m-btn pink" data-v-8b1eac0c>([[\p{Han}]+车)</div>`)
+var idURLRe = regexp.MustCompile(`http://album.zhenai.com/u/([0-9]+)`)
 
 //ParseProfile 用户信息的解析器
 //contents 要解析的内容
 //name 用户的名字
-func ParseProfile(contents []byte, name string) engine.ParserResult {
+func ParseProfile(contents []byte, URL string, name string) engine.ParserResult {
 	//声明用户信息的结构
 	proflie := model.Profile{}
 
@@ -56,13 +57,13 @@ func ParseProfile(contents []byte, name string) engine.ParserResult {
 	proflie.Car = extractString(contents, carRe)
 	//婚姻状况
 	//proflie.Marriage = extractString(contents, marriageRe)
-	item := engine.Items{
-		URL:     "",
-		ID:      "",
-		Type:    "zhenhun",
+	result := engine.ParserResult{Items: []engine.Items{{
+		URL:     URL,
+		ID:      extractString([]byte(URL), idURLRe),
+		Type:    "zhenai",
 		Payload: proflie,
-	}
-	result := engine.ParserResult{Items: []engine.Items{item}}
+	}}}
+
 	return result
 }
 

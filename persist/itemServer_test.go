@@ -84,7 +84,7 @@ func Test_save(t *testing.T) {
 			//Print the ID and document source for each hit.
 			for _, hit := range r["hits"].(map[string]interface{})["hits"].([]interface{}) {
 				//log.Printf(" * ID=%s, %s", hit.(map[string]interface{})["_id"], hit.(map[string]interface{})["_source"])
-				var person model.Profile
+				var person engine.Items
 				err := mapstructure.Decode(hit.(map[string]interface{})["_source"], &person)
 				if err != nil {
 					fmt.Println(err)

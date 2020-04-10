@@ -3,7 +3,6 @@ package persist
 import (
 	"context"
 	"crawler/engine"
-	"crawler/model"
 	"encoding/json"
 	"errors"
 	"log"
@@ -46,15 +45,13 @@ func save(item engine.Items) error {
 	//log.Println(elasticsearch.Version)
 	//log.Println(es.Info())
 	var b strings.Builder
-	if profile, ok := item.Payload.(model.Profile); ok {
-		proStr, err := json.Marshal(profile)
-		if err != nil {
-			log.Printf("Profile json parsing Error: %s", err)
-			return err
-		}
-		b.WriteString(string(proStr))
-		//fmt.Println(string(proStr))
+	profile, err := json.Marshal(item)
+	if err != nil {
+		//log.Printf("Profile json parsing Error: %s", err)
+		return err
 	}
+	b.WriteString(string(profile))
+
 	req := esapi.IndexRequest{
 		Index:        "dating_profile",
 		DocumentType: item.Type,

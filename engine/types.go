@@ -14,10 +14,10 @@ type ParserResult struct {
 
 //Items Items必须包含ID URL
 type Items struct {
-	URL     string
-	Type    string
-	ID      string
-	Payload interface{} //具体的内容
+	URL     string      `json:"url,omitempty" xml:"url"`
+	Type    string      `json:"type,omitempty" xml:"type"`
+	ID      string      `json:"id,omitempty" xml:"id"`
+	Payload interface{} `json:"payload,omitempty" xml:"payload"` //具体的内容
 }
 
 //NilParser 处理nil的情况

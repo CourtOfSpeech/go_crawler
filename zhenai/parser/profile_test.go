@@ -11,6 +11,7 @@ import (
 func TestParseProfile(t *testing.T) {
 	type args struct {
 		contents []byte
+		URL      string
 		name     string
 	}
 	//contents, err := fetcher.Fetch("http://album.zhenai.com/u/1402882293")
@@ -27,13 +28,13 @@ func TestParseProfile(t *testing.T) {
 		want engine.ParserResult
 	}{
 		// TODO: Add test cases.
-		{"在水伊人", args{contents, "在水伊人"},
+		{"在水伊人", args{contents, "http://album.zhenai.com/u/1402882293", "在水伊人"},
 			engine.ParserResult{
 				Items: []engine.Items{
-					engine.Items{
+					{
 						URL:  "http://album.zhenai.com/u/1402882293",
-						ID:   "http://album.zhenai.com/u/1402882293",
-						Type: "zhenhun",
+						ID:   "1402882293",
+						Type: "zhenai",
 						Payload: model.Profile{
 							Name:   "在水伊人",
 							Age:    44,
@@ -47,7 +48,7 @@ func TestParseProfile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ParseProfile(tt.args.contents, tt.args.name); !reflect.DeepEqual(got, tt.want) {
+			if got := ParseProfile(tt.args.contents, tt.args.URL, tt.args.name); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ParseProfile() = %v, want %v", got, tt.want)
 			}
 		})
