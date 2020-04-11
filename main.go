@@ -12,7 +12,7 @@ func main() {
 	// 	URL:        "https://www.zhenai.com/zhenghun",
 	// 	ParserFunc: parser.ParseCityList,
 	// })
-	itemChan, err := persist.ItemServer()
+	itemChan, err := persist.ItemServer("dating_profile")
 	if err != nil {
 		panic(err)
 	}

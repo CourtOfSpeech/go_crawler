@@ -16,8 +16,9 @@ import (
 
 func Test_save(t *testing.T) {
 	type args struct {
-		item engine.Items
-		es   *elasticsearch.Client
+		item  engine.Items
+		es    *elasticsearch.Client
+		index string
 	}
 	esc, err := elasticsearch.NewDefaultClient()
 	if err != nil {
@@ -28,7 +29,7 @@ func Test_save(t *testing.T) {
 		args args
 	}{
 		// TODO: Add test cases.
-		{"在水伊人", args{es: esc, item: engine.Items{
+		{"在水伊人", args{es: esc, index: "dating_profile", item: engine.Items{
 			URL:  "https://album.zhenai.com/u/1402882293",
 			Type: "zhenhun",
 			ID:   "1402882293",
@@ -45,7 +46,7 @@ func Test_save(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := save(tt.args.item, tt.args.es); err != nil {
+			if err := save(tt.args.item, tt.args.es, tt.args.index); err != nil {
 				t.Errorf("save() error = %v", err)
 			}
 
@@ -69,8 +70,8 @@ func Test_save(t *testing.T) {
 			// Perform the search request.
 			res, err := tt.args.es.Search(
 				tt.args.es.Search.WithContext(context.Background()),
-				tt.args.es.Search.WithIndex("dating_profile"),
-				tt.args.es.Search.WithDocumentType("zhenai"),
+				tt.args.es.Search.WithIndex(tt.args.index),
+				tt.args.es.Search.WithDocumentType(tt.args.item.Type),
 				tt.args.es.Search.WithBody(&buf),
 				tt.args.es.Search.WithTrackTotalHits(true),
 				tt.args.es.Search.WithPretty(),
