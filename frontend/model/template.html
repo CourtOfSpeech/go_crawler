@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div id="demo">
+        <div algin="middle">
+            <input type="text" maxlength="100" style="width: 500px;">
+            <button>搜索</button>
+        </div>
+        <h2>共为你找到相关结果{{.Hits}}个 显示从{{.Start}}起共{{len .Items}}个</h2>
+
+        <div class="">
+            <!-- table statrs here -->
+            <table id="table" class="">
+                <tbody>
+                    {{rang .Items}}
+                    <tr>
+                        <td><a href="{{.Url}}">{{.Payload.Name}}</a></td>
+                        {{with .Payload}}
+                        <td>{{.Age}}</td>
+                        <td>{{.Height}}</td>
+                        <td>{{.Income}}</td>
+                        <td>{{.Xinzuo}}</td>
+                        <td>{{.Hokou}}</td>
+                        <td>{{.House}}</td>
+                        <td>{{.Car}}</td>
+                        {{end}}
+                    </tr>
+                    {{else}}
+                    <div>没有找到相关用户</div>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+</body>
+</html>
